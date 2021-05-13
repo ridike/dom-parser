@@ -1,7 +1,8 @@
 import * as React from 'react'
 import { Input, PageTitle, Page, FormWrapper, Button,
   InfoBlock, InfoItem, InfoItemName, InfoItemList, InfoItemRow, InfoItemHeader,
-  FixedColumn, Link, ErrorMessage, Column } from 'globalStyles'
+  FixedColumn, Link, ErrorMessage, Column, Select, Label } from 'globalStyles'
+import { ProxySelectWrapper } from 'domAnaliser/styles'
 import { Loader, PageTopMessage } from 'components'
 import { DomServiceContext } from 'context'
 import { isValidUrl } from 'utils'
@@ -17,9 +18,14 @@ interface TreeObject {
 
 export function DomAnaliser() {
   const END_INDICATOR = '_END_'
+  const PROXY_SERVERS = [
+    { name: 'Code Tabs', value: 'https://api.codetabs.com/v1/proxy?quest=' },
+    { name: 'Thing Proxy', value: 'https://thingproxy.freeboard.io/fetch/' }
+  ]
   const domService = React.useContext(DomServiceContext)
   const [loading, setLoading] = React.useState<boolean>(false)
   const [error, setError] = React.useState<string>('')
+  const [chosenProxy, setChosenProxy] = React.useState<string>(PROXY_SERVERS[0].value)
   const [url, setUrl] = React.useState<string>('')
   const [urlValid, setUrlValid] = React.useState<boolean>(true)
   const [pageName, setPageName] = React.useState<string>('')
@@ -36,6 +42,7 @@ export function DomAnaliser() {
       setPageName('')
       setPageUrl('')
       setTopPathWithMostPopularTags([])
+      setTopLongestPaths([])
       nodeCounterRef.current = []
       ancestorCollectionRef.current = []
       setUrlValid(isValidUrl(url))
@@ -48,7 +55,7 @@ export function DomAnaliser() {
     if (!url) { return }
     try {
       setLoading(true)
-      const data = await domService.getDomData(url)
+      const data = await domService.getDomData(chosenProxy, url)
       setPageUrl(url)
       mapDOM(data)
       setStats()
@@ -155,6 +162,7 @@ export function DomAnaliser() {
     <div data-testid="dom-analiser">
       { error && <PageTopMessage text={error} onDismiss={() => setError('')} /> }
       <Page>
+        {loading && <Loader />}
         <img src={HeaderImage} alt="Sun" width="100" height="100" />
         <PageTitle>DOM analyzer</PageTitle>
         <FormWrapper>
@@ -169,7 +177,14 @@ export function DomAnaliser() {
           {!urlValid &&
             <ErrorMessage>Enter a valid url</ErrorMessage>
           }
-          {loading && <Loader />}
+          <ProxySelectWrapper>
+            <Label>Select a proxy</Label>
+            <Select id='proxy-select' onChange={e => setChosenProxy(e.target.value)}>
+              {PROXY_SERVERS.map(op =>
+                <option value={op.value}>{op.name}</option>
+              )}
+            </Select>
+          </ProxySelectWrapper>
           <Button onClick={() => analyze()}>Analyze</Button>
         </FormWrapper>
         <InfoBlock>

@@ -129,6 +129,19 @@ export const Link = styled.a`
   }
 `
 
+export const Select = styled.select`
+  ${commonStyles}
+  height: 2rem;
+  background: white;
+  color: black;
+`
+
+export const Label = styled.label`
+  height: 2rem;
+  display: flex;
+  align-items: center;
+`
+
 export const ErrorMessage = styled.div`
   margin-bottom: 1em;
   color: red;

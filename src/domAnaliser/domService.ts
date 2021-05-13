@@ -1,8 +1,8 @@
 export class DomService {
 
-  async getDomData(url: string): Promise<string> {
+  async getDomData(proxy: string, url: string): Promise<string> {
     // let response = await fetch(`https://api.codetabs.com/v1/proxy?quest=${url}`)
-    let response = await fetch(`https://thingproxy.freeboard.io/fetch/${url}`)
+    let response = await fetch(`${proxy}${url}`)
 
     if (!response.ok) {
       throw new Error('Looks like there was a problem. Status Code: ' + response.status)
