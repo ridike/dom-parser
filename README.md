@@ -7,10 +7,10 @@ This tiny web-application helps you analyse the html code of a given website.
 An HTML of a website by using one of the suggested proxy servers
 DOM tree is parsed using a DOMParser
 Basic statistics are returned:
-All unique tags used in the document
-The most commonly used tag
-The longest path starting from root node to the descendent
-The longest path starting from root node where the most popular tag is used the most times
+1. All unique tags used in the document
+2. The most commonly used tag
+3. The longest path starting from root node to the descendent
+4. The longest path starting from root node where the most popular tag is used the most times
 
 # Getting Started with Create React App
 
