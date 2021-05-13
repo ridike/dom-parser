@@ -169,7 +169,7 @@ export function DomAnaliser() {
           <Input
             type="text"
             id="url-field"
-            placeholder="Enter the URL of a website here!"
+            placeholder="Enter a url, e.g. https://revelsystems.com/"
             value={url}
             onChange={evt => setUrl(evt.target.value)}
             status={urlValid ? 'normal' : 'error'}
