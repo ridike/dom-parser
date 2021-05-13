@@ -12,6 +12,9 @@ Basic statistics are returned:
 3. The longest path starting from root node to the descendent
 4. The longest path starting from root node where the most popular tag is used the most times
 
+## Author
+ridike
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
