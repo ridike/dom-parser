@@ -74,7 +74,7 @@ export function DomAnaliser() {
     if (typeof element === "string") {
       if (window.DOMParser) {
         const parser = new DOMParser()
-        docNode = parser.parseFromString(element, "text/html") // TODO: check if parses xml
+        docNode = parser.parseFromString(element, "text/html")
         domElement = docNode.children.item(0)
       } else {
         docNode = new ActiveXObject("Microsoft.XMLDOM")
@@ -180,8 +180,8 @@ export function DomAnaliser() {
           <ProxySelectWrapper>
             <Label>Select a proxy</Label>
             <Select id='proxy-select' onChange={e => setChosenProxy(e.target.value)}>
-              {PROXY_SERVERS.map(op =>
-                <option value={op.value}>{op.name}</option>
+              {PROXY_SERVERS.map((op, i) =>
+                <option key={i} value={op.value}>{op.name}</option>
               )}
             </Select>
           </ProxySelectWrapper>

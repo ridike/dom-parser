@@ -4,7 +4,7 @@ This tiny web-application helps you analyse the html code of a given website.
 
 ## How it works
 
-An HTML of a website by using a proxy server (https://api.codetabs.com/)
+An HTML of a website by using one of the suggested proxy servers
 DOM tree is parsed using a DOMParser
 Basic statistics are returned:
 All unique tags used in the document
