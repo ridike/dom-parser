@@ -1,3 +1,17 @@
+# HTML Analyser
+
+This tiny web-application helps you analyse the html code of a given website.
+
+## How it works
+
+An HTML of a website by using a proxy server (https://api.codetabs.com/)
+DOM tree is parsed using a DOMParser
+Basic statistics are returned:
+All unique tags used in the document
+The most commonly used tag
+The longest path starting from root node to the descendent
+The longest path starting from root node where the most popular tag is used the most times
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

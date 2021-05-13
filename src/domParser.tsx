@@ -1,5 +1,7 @@
 import * as React from 'react'
-import { Input, PageTitle, Page, FormWrapper, Button, InfoBlock, InfoItem, Link, ErrorMessage } from 'globalStyles'
+import { Input, PageTitle, Page, FormWrapper, Button,
+  InfoBlock, InfoItem, InfoItemName, InfoItemList, InfoItemRow, InfoItemHeader,
+  FixedColumn, Link, ErrorMessage, Column } from 'globalStyles'
 import { Loader, PageTopMessage } from 'components'
 import { DomServiceContext } from 'context'
 import { isValidUrl } from 'utils'
@@ -72,12 +74,12 @@ export function DomParser() {
         const parser = new DOMParser()
         docNode = parser.parseFromString(element, "text/html") // TODO: check if parses xml
         domElement = docNode.children.item(0)
+      } else {
+        docNode = new ActiveXObject("Microsoft.XMLDOM")
+        docNode.async = false
+        docNode.loadXML(element)
+        domElement = docNode.children.item(0)
       }
-      // else {
-      //   docNode = new ActiveXObject("Microsoft.XMLDOM")
-      //   docNode.async = false
-      //   docNode.loadXML(element)
-      // }
     }
 
     if (!domElement) { return }
@@ -93,7 +95,8 @@ export function DomParser() {
       ancestorsArray.forEach(a => {
         if (a === nodeCounterRef.current[0].name) { occurences++ }
       })
-      if (!!occurences) {
+      if (!!occurences && ancestorsArray[ancestorsArray.length - 1] === '_END_') {
+        ancestorsArray.pop()
         filtered.push({
           path: ancestorsArray,
           occurences
@@ -105,7 +108,15 @@ export function DomParser() {
     const longestPaths = reduced.sort(function(arrayA, arrayB) {
       return arrayB.occurences - arrayA.occurences
     })
-    setTopPathWithMostPopularTags(longestPaths.slice(0,3))
+    const topLength = longestPaths[0].path.length
+    const top = [longestPaths[0]]
+    if (longestPaths[1]?.path.length === topLength) {
+      top.push(longestPaths[1])
+    }
+    if (longestPaths[2]?.path.length === topLength) {
+      top.push(longestPaths[2])
+    }
+    setTopPathWithMostPopularTags(top)
   }
 
   function updateCounter(elementName: string) {
@@ -140,12 +151,16 @@ export function DomParser() {
       }
     }
     const ancestorsAndSelf = [...parents]
-    ancestorsAndSelf.push(element.nodeName)
-    ancestorCollectionRef.current.push(ancestorsAndSelf)
-
     if (parents.length > longestPathRef.current.length) {
       longestPathRef.current = ancestorsAndSelf
     }
+
+    ancestorsAndSelf.push(element.nodeName)
+    if (nodeList === null || nodeList.length === 0) {
+      ancestorsAndSelf.push('_END_')
+    }
+    ancestorCollectionRef.current.push(ancestorsAndSelf)
+
   }
 
   return (
@@ -172,30 +187,72 @@ export function DomParser() {
         <InfoBlock>
           { !!pageName && !!pageUrl &&
             <InfoItem>
-              <div>Document name: {pageName}</div>
-              <div>Document url: <Link href={pageUrl} target="_blank">{pageUrl}</Link></div>
+              <InfoItemName>Page information:</InfoItemName>
+              <InfoItemRow>
+                <FixedColumn style={{width: '8rem'}}>Document name:</FixedColumn>
+                <Column>{pageName}</Column>
+              </InfoItemRow>
+              <InfoItemRow>
+                <FixedColumn style={{width: '8rem'}}>
+                  Document url:
+                </FixedColumn>
+                <Column>
+                  <Link href={pageUrl} target="_blank">{pageUrl}</Link>
+                </Column>
+              </InfoItemRow>
             </InfoItem>
           }
           { nodeCounterRef.current.length > 0 &&
             <InfoItem>
-              <div>All unique tags (by popularity):</div>
-              {nodeCounterRef.current.map(mpt =>
-                <div key={mpt.name}>{mpt.name}: {mpt.count}</div>
-              )}
+              <InfoItemName>All unique tags</InfoItemName>
+              <InfoItemList>
+                <InfoItemHeader>
+                  <Column>Name</Column>
+                  <Column>Occurences</Column>
+                </InfoItemHeader>
+                {nodeCounterRef.current.map(mpt =>
+                  <InfoItemRow key={mpt.name}>
+                    <Column>{mpt.name}</Column>
+                    <Column>{mpt.count}</Column>
+                  </InfoItemRow>
+                )}
+              </InfoItemList>
             </InfoItem>
           }
           { longestPathRef.current.length > 0 &&
             <InfoItem>
-              <div>Longest path:</div>
-              <div>{longestPathRef.current.join(' -> ')}</div>
+              <InfoItemName>Longest path</InfoItemName>
+              <InfoItemHeader>
+                <FixedColumn>Length</FixedColumn>
+                <Column>Path</Column>
+              </InfoItemHeader>
+              <InfoItemRow high>
+                <FixedColumn>{longestPathRef.current.length}</FixedColumn>
+                <Column>{longestPathRef.current.join(' -> ')}</Column>
+              </InfoItemRow>
             </InfoItem>
           }
           { topPathWithMostPopularTags.length > 0 &&
             <InfoItem>
-              <div>Longest paths with most popular tag ({nodeCounterRef.current[0].name}):</div>
-              {topPathWithMostPopularTags.map((tp, i) =>
-                <div key={i}>{tp.path.join(' -> ')}</div>
-              )}
+              <InfoItemName>Longest paths with the most popular tag ({nodeCounterRef.current[0].name})</InfoItemName>
+              <InfoItemList>
+                <InfoItemHeader>
+                  <FixedColumn style={{marginRight: '1rem', flex: '0 1 auto', width: '4rem'}}>Length</FixedColumn>
+                  <Column>Path</Column>
+                </InfoItemHeader>
+                {topPathWithMostPopularTags.map((tp, i) =>
+                  <InfoItemRow key={i} high>
+                    <FixedColumn style={{marginRight: '1rem', flex: '0 1 auto', width: '4rem'}}>{tp.path.length}</FixedColumn>
+                    <Column>
+                      {tp.path.map((p, i) =>
+                        <span style={nodeCounterRef.current[0].name === p ? {fontWeight: 600} : {}}>
+                          {p}{i < tp.path.length - 1 ? ` -> ` : ''}
+                        </span>
+                      )}
+                    </Column>
+                  </InfoItemRow>
+                )}
+              </InfoItemList>
             </InfoItem>
           }
         </InfoBlock>

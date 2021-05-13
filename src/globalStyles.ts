@@ -56,7 +56,7 @@ export const PageTitle = styled.div`
 `
 
 export const Page = styled.div`
-  padding: 10em 0;
+  padding: 7rem 0;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -80,10 +80,46 @@ export const InfoBlock = styled.div`
 
 export const InfoItem = styled.div`
   text-align: left;
+  font-size: .9rem;
   margin: 1rem;
   background-color: rgba(255, 255, 255, 0.5);
   border-radius: .5rem;
-  padding: 1em;
+  padding: 1.5rem;
+  min-width: 20rem;
+`
+
+export const InfoItemList = styled.div`
+`
+
+export const InfoItemName = styled.div`
+  margin-bottom: 1rem;
+  font-weight: 600;
+  font-size: 1.1rem;
+`
+
+interface RowProps {
+  high?: boolean
+}
+export const InfoItemRow = styled.div<RowProps>`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-top: ${props => props.high ? '1rem' : '.25rem'};
+`
+
+export const Column = styled.div`
+  flex: 1;
+`
+
+export const FixedColumn = styled.div`
+   margin-right: 1rem;
+   flex: 0 1 auto;
+   width: 4rem;
+`
+
+export const InfoItemHeader = styled(InfoItemRow)`
+  font-weight: 600;
+  margin-bottom: 1rem;
 `
 
 export const Link = styled.a`
