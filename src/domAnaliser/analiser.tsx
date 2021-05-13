@@ -5,7 +5,8 @@ import { Input, PageTitle, Page, FormWrapper, Button,
 import { Loader, PageTopMessage } from 'components'
 import { DomServiceContext } from 'context'
 import { isValidUrl } from 'utils'
-import HeaderImage from './sun.png'
+import HeaderImage from 'sun.png'
+import { PathAndOccurences, getTopPathsWithMostPopularTag, getTop3Paths } from 'domAnaliser/helpers'
 
 interface TreeObject {
   type?: string
@@ -14,12 +15,8 @@ interface TreeObject {
   parents?: string[]
 }
 
-interface PathAndOccurences {
-  path: string[],
-  occurences: number
-}
-
-export function DomParser() {
+export function DomAnaliser() {
+  const END_INDICATOR = '_END_'
   const domService = React.useContext(DomServiceContext)
   const [loading, setLoading] = React.useState<boolean>(false)
   const [error, setError] = React.useState<string>('')
@@ -28,9 +25,9 @@ export function DomParser() {
   const [pageName, setPageName] = React.useState<string>('')
   const [pageUrl, setPageUrl] = React.useState<string>('')
   const [topPathWithMostPopularTags, setTopPathWithMostPopularTags] = React.useState<PathAndOccurences[]>([])
+  const [topLongestPaths, setTopLongestPaths] = React.useState<string[][]>([])
 
   const nodeCounterRef = React.useRef<{name: string, count: number}[]>([])
-  const longestPathRef = React.useRef<string[]>([])
   const ancestorCollectionRef = React.useRef<string[][]>([])
 
   React.useEffect(() => {
@@ -40,7 +37,6 @@ export function DomParser() {
       setPageUrl('')
       setTopPathWithMostPopularTags([])
       nodeCounterRef.current = []
-      longestPathRef.current = []
       ancestorCollectionRef.current = []
       setUrlValid(isValidUrl(url))
     } else {
@@ -54,8 +50,7 @@ export function DomParser() {
       setLoading(true)
       const data = await domService.getDomData(url)
       setPageUrl(url)
-      const html = mapDOM(data)
-      console.log(html)
+      mapDOM(data)
       setStats()
       setUrl('')
     } catch (e) {
@@ -89,34 +84,30 @@ export function DomParser() {
 
   function setStats() {
     nodeCounterRef.current.sort(function(a, b) { return b.count - a.count })
-
+    const completePaths: string[][] = []
     const reduced = ancestorCollectionRef.current.reduce((filtered: PathAndOccurences[], ancestorsArray: string[]) => {
       let occurences = 0
       ancestorsArray.forEach(a => {
         if (a === nodeCounterRef.current[0].name) { occurences++ }
       })
-      if (!!occurences && ancestorsArray[ancestorsArray.length - 1] === '_END_') {
+      if (ancestorsArray[ancestorsArray.length - 1] === END_INDICATOR) {
         ancestorsArray.pop()
-        filtered.push({
-          path: ancestorsArray,
-          occurences
-        })
+        if (!!occurences) {
+          filtered.push({
+            path: ancestorsArray,
+            occurences
+          })
+        }
+        completePaths.push(ancestorsArray)
       }
       return filtered
     }, [])
 
-    const longestPaths = reduced.sort(function(arrayA, arrayB) {
-      return arrayB.occurences - arrayA.occurences
-    })
-    const topLength = longestPaths[0].path.length
-    const top = [longestPaths[0]]
-    if (longestPaths[1]?.path.length === topLength) {
-      top.push(longestPaths[1])
-    }
-    if (longestPaths[2]?.path.length === topLength) {
-      top.push(longestPaths[2])
-    }
-    setTopPathWithMostPopularTags(top)
+    const longestPaths = getTop3Paths(completePaths)
+    setTopLongestPaths(longestPaths)
+
+    const topWithTag = getTopPathsWithMostPopularTag(reduced)
+    setTopPathWithMostPopularTags(topWithTag)
   }
 
   function updateCounter(elementName: string) {
@@ -151,20 +142,17 @@ export function DomParser() {
       }
     }
     const ancestorsAndSelf = [...parents]
-    if (parents.length > longestPathRef.current.length) {
-      longestPathRef.current = ancestorsAndSelf
-    }
 
     ancestorsAndSelf.push(element.nodeName)
     if (nodeList === null || nodeList.length === 0) {
-      ancestorsAndSelf.push('_END_')
+      ancestorsAndSelf.push(END_INDICATOR)
     }
     ancestorCollectionRef.current.push(ancestorsAndSelf)
 
   }
 
   return (
-    <div data-testid="dom-parser">
+    <div data-testid="dom-analiser">
       { error && <PageTopMessage text={error} onDismiss={() => setError('')} /> }
       <Page>
         <img src={HeaderImage} alt="Sun" width="100" height="100" />
@@ -219,17 +207,19 @@ export function DomParser() {
               </InfoItemList>
             </InfoItem>
           }
-          { longestPathRef.current.length > 0 &&
+          { topLongestPaths.length > 0 &&
             <InfoItem>
-              <InfoItemName>Longest path</InfoItemName>
+              <InfoItemName>Top 3 longest paths</InfoItemName>
               <InfoItemHeader>
                 <FixedColumn>Length</FixedColumn>
                 <Column>Path</Column>
               </InfoItemHeader>
-              <InfoItemRow high>
-                <FixedColumn>{longestPathRef.current.length}</FixedColumn>
-                <Column>{longestPathRef.current.join(' -> ')}</Column>
-              </InfoItemRow>
+              {topLongestPaths.map((tp, i) =>
+                <InfoItemRow key={i} high>
+                  <FixedColumn>{tp.length}</FixedColumn>
+                  <Column>{tp.join(' -> ')}</Column>
+                </InfoItemRow>
+              )}
             </InfoItem>
           }
           { topPathWithMostPopularTags.length > 0 &&
@@ -245,7 +235,7 @@ export function DomParser() {
                     <FixedColumn style={{marginRight: '1rem', flex: '0 1 auto', width: '4rem'}}>{tp.path.length}</FixedColumn>
                     <Column>
                       {tp.path.map((p, i) =>
-                        <span style={nodeCounterRef.current[0].name === p ? {fontWeight: 600} : {}}>
+                        <span key={i} style={nodeCounterRef.current[0].name === p ? {fontWeight: 600} : {}}>
                           {p}{i < tp.path.length - 1 ? ` -> ` : ''}
                         </span>
                       )}

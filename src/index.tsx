@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { DomService } from 'domService'
+import { DomService } from 'domAnaliser/domService'
 import { DomServiceContext } from 'context'
 
 const domService = new DomService()

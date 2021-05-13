@@ -104,7 +104,7 @@ export const InfoItemRow = styled.div<RowProps>`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  margin-top: ${props => props.high ? '1rem' : '.25rem'};
+  margin-top: ${props => !!props.high ? '1rem' : '.25rem'};
 `
 
 export const Column = styled.div`

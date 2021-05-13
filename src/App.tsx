@@ -1,9 +1,9 @@
-import { DomParser } from 'domParser'
+import { DomAnaliser } from 'domAnaliser/analiser'
 
 function App() {
   return (
     <div className="App" data-testid="app">
-      <DomParser />
+      <DomAnaliser />
     </div>
   )
 }

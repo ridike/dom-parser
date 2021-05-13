@@ -1,9 +1,9 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-import { DomParser } from 'domParser'
+import { DomAnaliser } from 'domAnaliser/analiser'
 
 test('renders parser, enter website, clicks the button, clears imput value', () => {
-  render(<DomParser />)
-  const pageElement = screen.getByTestId('dom-parser')
+  render(<DomAnaliser />)
+  const pageElement = screen.getByTestId('dom-analiser')
   expect(pageElement).toBeInTheDocument()
   const inputElement = screen.getByPlaceholderText('Enter the URL of a website here!')
   expect(inputElement).toBeInTheDocument()
